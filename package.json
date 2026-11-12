@@ -1,0 +1,12 @@
+{
+  "name": "padaria-artesanal",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site e painel de administracao da padaria",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.13.0 <25.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+SITE DE DEMONSTRACAO - PADARIA ARTESANAL
+
+Abrir index.html num browser para ver o site. Para publicar, alojar index.html num servico de hosting estatico.
+
+O QUE ESTA INCLUIDO
+- Pagina inicial responsiva, historia, catalogo filtravel, galeria e contactos.
+- Ligacao real ao Livro de Reclamacoes Eletronico.
+- Modais informativos provisórios sobre privacidade, cookies e dados legais.
+- Sem encomendas online e sem pagamentos, conforme pedido.
+
+ANTES DE PUBLICAR
+1. Escolher nome da padaria e logotipo.
+2. Atualizar produtos, precos e descricoes na lista PRODUCTS do index.html.
+3. Substituir fotografias de demonstracao por imagens proprias com autorizacao de utilizacao. As imagens atuais sao carregadas externamente e necessitam internet.
+4. Substituir morada, horarios, telefone, email, NIF, entidade exploradora e contactos de redes sociais.
+5. So ativar links de WhatsApp, telefone, redes sociais e Maps depois de introduzir os enderecos reais. Neste demo os links sociais apontam para contactos e o botao WhatsApp esta desativado.
+6. Verificar lista de ingredientes e alergenios de cada produto e as obrigacoes de informacao relevantes.
+7. Validar termos legais, politica de privacidade, cookies e entidade RAL aplicavel antes da publicacao. Se adicionar servicos de terceiros, reavaliar cookies e protecao de dados.
+8. Confirmar que os precos definitivos incluem IVA e que o estabelecimento cumpre as demais obrigacoes legais.
+
+Ficheiro unico sem dependencias de JavaScript. Fontes e fotografias externas necessitam de internet.
