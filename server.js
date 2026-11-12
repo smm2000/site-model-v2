@@ -12,7 +12,27 @@ const defaults={name:'Padaria Artesanal',subtitle:'Nome a definir',address:'',ho
 const putSetting=db.prepare('INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)');for(const [k,v] of Object.entries(defaults))putSetting.run(k,v);
 if(db.prepare("SELECT value FROM settings WHERE key='catalog_initialized'").get()===undefined && db.prepare('SELECT COUNT(*) AS c FROM products').get().c===0){const seed=[['Pão de mistura','Pão','1,80 €','Pão rústico com miolo macio e crosta estaladiça.','Fornada do dia','https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=650&q=80'],['Pão de sementes','Pão','2,40 €','Uma opção rica em textura e sabor.','Artesanal','https://images.unsplash.com/photo-1585478259715-876acc5be8eb?auto=format&fit=crop&w=650&q=80'],['Croissant','Pastelaria','1,65 €','Dourado, delicado e perfeito para acompanhar um café.','Favorito','https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=650&q=80'],['Pastel de nata','Pastelaria','1,40 €','Massa folhada crocante e creme suave.','Clássico','https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=650&q=80'],['Bolo de chocolate','Bolos','3,20 €','Fatia generosa para os momentos mais doces.','À fatia','https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=650&q=80'],['Bolo de aniversário','Bolos','Sob consulta','Uma sugestão para celebrações e dias especiais.','Personalizável','https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=650&q=80'],['Sandes fresca','Salgados','3,90 €','Uma opção prática e saborosa para uma pausa.','Lanche','https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=650&q=80'],['Tosta mista','Salgados','3,50 €','Um clássico quente e reconfortante.','Salgado','https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=650&q=80'],['Café expresso','Bebidas','0,90 €','Pequeno no tamanho, grande no aroma.','Bebida quente','https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=650&q=80']];const insert=db.prepare('INSERT INTO products(name,category,price,description,tag,image,position) VALUES(?,?,?,?,?,?,?)');seed.forEach((x,i)=>insert.run(...x,i));}putSetting.run('catalog_initialized','1');
 function derive(password,salt){return crypto.scryptSync(password,Buffer.from(salt,'hex'),64).toString('hex')}
+// Admin temporario para ambiente de testes: credenciais apenas em Environment do Render.
+// A conta so e criada quando ainda nao existe qualquer administrador nesta base de dados.
+function bootstrapTemporaryAdmin(){
+  const email=String(process.env.TEMP_ADMIN_EMAIL||'').trim().toLowerCase();
+  const password=process.env.TEMP_ADMIN_PASSWORD||'';
+  if(!email && !password)return;
+  if(!/^\S+@\S+\.\S+$/.test(email)||password.length<12){
+    console.error('TEMP_ADMIN_EMAIL/TEMP_ADMIN_PASSWORD invalidos: forneca email e palavra-passe de pelo menos 12 caracteres.');
+    return;
+  }
+  if(db.prepare('SELECT COUNT(*) AS total FROM admins').get().total>0){
+    console.log('Ja existe um administrador; bootstrap temporario ignorado.');
+    return;
+  }
+  const salt=crypto.randomBytes(32).toString('hex');
+  db.prepare('INSERT INTO admins(email,salt,password_hash) VALUES(?,?,?)')
+    .run(email,salt,derive(password,salt));
+  console.log('Administrador temporario criado para testes (sem registar credenciais).');
+}
 if(process.argv[2]==='set-admin'){const email=(process.env.ADMIN_EMAIL||'').toLowerCase().trim(),password=process.env.ADMIN_PASSWORD||'';if(!/^\S+@\S+\.\S+$/.test(email)||password.length<12){console.error('Defina ADMIN_EMAIL e ADMIN_PASSWORD (mínimo 12 caracteres).');process.exit(1)}const salt=crypto.randomBytes(32).toString('hex');db.prepare('INSERT INTO admins(email,salt,password_hash) VALUES(?,?,?) ON CONFLICT(email) DO UPDATE SET salt=excluded.salt,password_hash=excluded.password_hash').run(email,salt,derive(password,salt));db.prepare('DELETE FROM sessions').run();console.log('Administrador criado/atualizado:',email);process.exit(0)}
+bootstrapTemporaryAdmin();
 const PORT=Number(process.env.PORT)||3000;const cookieName='padaria_session';
 function clientKey(req){return crypto.createHash('sha256').update(String(req.socket.remoteAddress||'unknown')).digest('hex')}
 function loginBlocked(key){return db.prepare('SELECT attempts,blocked_until FROM login_attempts WHERE ip=?').get(key)}
